@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="Golovna.css">
+    <script src="script.js" defer></script>
+
+</head> 
+<body>  
+    
+  <!-- НАЙПОПУЛЯРНІШІ ПОСЛУГИ У НАС -->
+
+  <section class="popular-services">
+  <h2>НАЙПОПУЛЯРНІШІ ПОСЛУГИ У НАС</h2>
+
+  <div class="carousel">
+    <div class="carousel-track"> 
+
+      <div class="carousel-item">
+        <img src="/screenshots/massage/1.jpg" alt="МАСАЖ СПИНИ">
+        <div class="caption">
+          <h3>МАСАЖ СПИНИ</h3>
+          <p>Масаж спини — це один із найефективніших способів зняти напругу, розслабити м’язи та відновити гарне самопочуття...</p>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <img src="/screenshots/massage/1.jpg" alt="Антицелюлітний масаж">
+        <div class="caption">
+          <h3>АНТИЦЕЛЮЛІНТНИЙ МАСАЖ</h3>
+          <p>Антицелюлітний масаж — це спеціалізована техніка, спрямована на зменшення зовнішніх проявів целюліту...</p>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <img src="screenshots/massage/2.jpg" alt="Лімфодренажний масаж">
+        <div class="caption">
+          <h3>ЛІМФОДРЕНАЖНИЙ МАСАЖ</h3>
+          <p>Лімфодренажний масаж — це спеціалізована методика масажу, яка спрямована на стимуляцію лімфатичної системи...</p>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <img src="screenshots/massage/11.jpg" alt="МАСАЖ ОБЛИЧЧЯ">
+        <div class="caption">
+          <h3>МАСАЖ ОБЛИЧЧЯ</h3>
+          <p>Масаж обличчя — це професійна процедура, яка об’єднує ручні та, за потреби, апаратні техніки, спрямовані на покращення стану шкіри...</p>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <img src="screenshots/massage/3.jpg" alt="Глибоко тканинний масаж">
+        <div class="caption">
+          <h3>ГЛИБОКО ТКАНИННИЙ МАСАЖ</h3>
+          <p>Глибоко тканинний масаж — це інтенсивна форма масажу, спрямована на роботу з глибоко  розташованими м'язами та тканинами....</p>
+        </div>
+      </div>
+
+      <div class="carousel-item">
+        <img src="screenshots/massage/4.jpg" alt="БАНОЧНИЙ МАСАЖ">
+        <div class="caption">
+          <h3>БАНОЧНИЙ МАСАЖ</h3>
+          <p>Баночний масаж — це процедура, яка використовує вакуум для стимуляції кровообігу, покращення лімфодренажу та стану м’язів...</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 🔽 Кнопки під першим фото -->
+  <div class="carousel-navigation">
+  <div class="carousel-buttons">
+    <button class="carousel-btn prev">⟸</button>
+    <button class="carousel-btn next">⟹</button>
+  </div>
+
+  <div class="carousel-indicators-wrapper">
+    <div class="carousel-indicators">
+      <span class="dot active"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+  </div>
+    <a href="Poslygi.html">
+ <button class="carousel-btn">ПЕРЕГЛЯНУТИ БІЛЬШЕ</button>
+    </a>
+</div>
+</section>
+
+ 
+  <!-- НАЙПОПУЛЯРНІШІ ПОСЛУГИ ПЕРЕМОТКА ФОТОК -->
+<script>
+  const track = document.querySelector('.carousel-track');
+  const items = document.querySelectorAll('.carousel-item');
+  const prevBtn = document.querySelector('.carousel-btn.prev');
+  const nextBtn = document.querySelector('.carousel-btn.next');
+  const dots = document.querySelectorAll('.dot');
+
+  let currentIndex = 0;
+
+  function updateCarousel() {
+  const itemWidth = items[0].offsetWidth + 20;
+  track.style.transform = `translateX(-${currentIndex * itemWidth}px)`; 
+
+  // 🔁 обчислюємо індекс кружка: кожні 2 фото = 1 кружок
+  const dotIndex = Math.floor(currentIndex / 2);
+
+  dots.forEach(dot => dot.classList.remove('active'));
+  if (dots[dotIndex]) dots[dotIndex].classList.add('active');
+}
+  nextBtn.addEventListener('click', () => {
+    currentIndex = (currentIndex + 1) % items.length;
+    updateCarousel();
+  });
+
+  prevBtn.addEventListener('click', () => {
+    currentIndex = (currentIndex - 1 + items.length) % items.length;
+    updateCarousel();
+  });
+
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      currentIndex = index;
+      updateCarousel();
+    });
+  });
+
+  setInterval(() => {
+    currentIndex = (currentIndex + 1) % items.length;
+    updateCarousel();
+  }, 20000); // авто прокрутка кожні 10 секунд
+
+  window.addEventListener('resize', updateCarousel);
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const section = document.querySelector('.popular-services');
+    const items = document.querySelectorAll('.carousel-item');
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          items.forEach((item, index) => {
+            setTimeout(() => {
+              item.classList.add('animate');
+            }, index * 200); // затримка для кожної картки
+          });
+          observer.unobserve(section); // щоб не повторювалось
+        }
+      });
+    }, { threshold: 0.2 }); // 20% секції має бути видно
+
+    observer.observe(section);
+  });
+</script>
+<div id="footer"></div>
+</body>
+</html>

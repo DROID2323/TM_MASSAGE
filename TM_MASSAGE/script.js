@@ -1,3 +1,24 @@
+// Забороняємо браузеру запам'ятовувати позицію скролу при оновленні сторінки
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
+function forceScrollTop() {
+  window.scrollTo(0, 0);
+}
+
+forceScrollTop();
+
+window.addEventListener("load", forceScrollTop);
+
+// Спрацьовує навіть при поверненні зі кешу браузера (кнопка "назад")
+window.addEventListener("pageshow", forceScrollTop);
+
+// Додаткова страховка з невеликою затримкою — на випадок,
+// якщо браузер відновлює позицію вже ПІСЛЯ load
+setTimeout(forceScrollTop, 100);
+setTimeout(forceScrollTop, 300);
+
 document.addEventListener("DOMContentLoaded", () => {
   // ============================================================
   // Модальне вікно запису на масаж
@@ -199,23 +220,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   
-     // ============================================================
-  // Топбар + футер (працюють однаково на всіх сторінках)
   // ============================================================
-  const topbarContainer = document.getElementById("topbar");
-  const footerContainer = document.getElementById("footer");
-
-  let topbarReady = !topbarContainer;
-  let footerReady = !footerContainer;
-
-  function checkAllReadyAndRestoreScroll() {
-    if (topbarReady && footerReady) {
-      setTimeout(restoreScrollPosition, 50);
-    }
-  }
+  // Топбар + перемикач мов (працює однаково на всіх сторінках)
+  // ============================================================
+    const topbarContainer = document.getElementById("topbar");
 
   if (topbarContainer) {
-      fetch("/top-bar.html")
+    fetch("top-bar.html")
       .then((res) => res.text())
       .then((html) => {
         topbarContainer.innerHTML = html;
@@ -227,38 +238,73 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
 
-        topbarReady = true;
-        checkAllReadyAndRestoreScroll();
+        setupLanguageSwitcher();
       });
   }
 
+  const footerContainer = document.getElementById("footer");
+
   if (footerContainer) {
-      fetch("/footer.html")
+    fetch("footer.html")
       .then((res) => res.text())
       .then((html) => {
         footerContainer.innerHTML = html;
-
-        footerReady = true;
-        checkAllReadyAndRestoreScroll();
       });
   }
 
-  // ============================================================
-  // Збереження та відновлення позиції скролу при оновленні сторінки
-  // ============================================================
-  const scrollKey = "scrollPos:" + window.location.pathname;
+  function setupLanguageSwitcher() {
+    const langSelect = document.getElementById("custom-lang-select");
+    if (!langSelect) return;
 
-  window.addEventListener("beforeunload", () => {
-    sessionStorage.setItem(scrollKey, window.scrollY);
-  });
+    langSelect.addEventListener("change", function () {
+      triggerGoogleTranslate(this.value);
+    });
 
-  function restoreScrollPosition() {
-    const savedPos = sessionStorage.getItem(scrollKey);
-    if (savedPos !== null) {
-      window.scrollTo(0, parseInt(savedPos, 10));
+    loadGoogleTranslateScript();
+  }
+
+  function loadGoogleTranslateScript() {
+    if (document.getElementById("google-translate-script")) return;
+
+    const script = document.createElement("script");
+    script.id = "google-translate-script";
+    script.src = "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+    document.body.appendChild(script);
+  }
+
+    function triggerGoogleTranslate(lang) {
+    const select = document.querySelector(".goog-te-combo");
+    if (select) {
+      select.value = lang;
+      select.dispatchEvent(new Event("change"));
+    } else {
+      setTimeout(() => triggerGoogleTranslate(lang), 500);
     }
   }
-});
+
+  // Примусово ховаємо панель Google Translate, якщо вона з'являється
+  function forceHideGoogleBanner() {
+    document.body.style.top = "0px";
+    document.body.style.position = "static";
+
+    document.querySelectorAll("iframe.goog-te-banner-frame, .goog-te-banner-frame").forEach((el) => {
+      el.style.display = "none";
+      el.style.visibility = "hidden";
+      el.style.height = "0";
+    });
+  }
+
+  const bannerObserver = new MutationObserver(forceHideGoogleBanner);
+  bannerObserver.observe(document.body, {
+    attributes: true,
+    attributeFilter: ["style"],
+    childList: true,
+    subtree: true
+  });
+
+  setInterval(forceHideGoogleBanner, 300);
+}); 
+
 
   // ============================================================
   // Fade-in анімація секцій при скролі
@@ -352,71 +398,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // Lightbox для сертифікатів на сторінці "Про нас"
-  // ============================================================
-  const certCards = document.querySelectorAll(".certificate-card");
-  const certLightbox = document.getElementById("certLightbox");
-  const certLightboxImg = document.getElementById("certLightboxImg");
-  const certLightboxCaption = document.getElementById("certLightboxCaption");
-  const certLightboxClose = document.getElementById("certLightboxClose");
-  const certLightboxPrev = document.getElementById("certLightboxPrev");
-  const certLightboxNext = document.getElementById("certLightboxNext");
-
-  let currentCertIndex = 0;
-
-  if (certCards.length > 0 && certLightbox) {
-    function openCertLightbox(index) {
-      const card = certCards[index];
-      if (!card) return;
-
-      const img = card.querySelector("img");
-      const label = card.querySelector(".certificate-label");
-
-      certLightboxImg.src = img.src;
-      certLightboxImg.alt = img.alt;
-      certLightboxCaption.textContent = label ? label.textContent : "";
-
-      currentCertIndex = index;
-      certLightbox.classList.add("show");
-    }
-
-    function closeCertLightbox() {
-      certLightbox.classList.remove("show");
-    }
-
-    function showNextCert() {
-      currentCertIndex = (currentCertIndex + 1) % certCards.length;
-      openCertLightbox(currentCertIndex);
-    }
-
-    function showPrevCert() {
-      currentCertIndex = (currentCertIndex - 1 + certCards.length) % certCards.length;
-      openCertLightbox(currentCertIndex);
-    }
-
-    certCards.forEach((card, index) => {
-      card.addEventListener("click", () => openCertLightbox(index));
-    });
-
-    if (certLightboxClose) certLightboxClose.addEventListener("click", closeCertLightbox);
-    if (certLightboxNext) certLightboxNext.addEventListener("click", showNextCert);
-    if (certLightboxPrev) certLightboxPrev.addEventListener("click", showPrevCert);
-
-    certLightbox.addEventListener("click", (e) => {
-      if (e.target === certLightbox) closeCertLightbox();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (!certLightbox.classList.contains("show")) return;
-      if (e.key === "Escape") closeCertLightbox();
-      if (e.key === "ArrowRight") showNextCert();
-      if (e.key === "ArrowLeft") showPrevCert();
-    });
-  }
-  
-
-
-  // ============================================================
   // Слайдер "Відгуки клієнтів" (Swiper.js) — ті самі фішки, що й у популярних послугах
   // ============================================================
   const reviewSwiperEl = document.querySelector(".reviewSwiper");
@@ -464,82 +445,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
-
-
-    // ============================================================
-  // Живий статус роботи (відкрито/закрито + розклад)
-  // ============================================================
-  const statusDot = document.getElementById("statusDot");
-  const statusText = document.getElementById("statusText");
-  const statusDetail = document.getElementById("statusDetail");
-  const scheduleList = document.getElementById("scheduleList");
-
-  const workingHours = {
-    0: { open: 8, close: 13 },  // Неділя
-    1: { open: 8, close: 17 },
-    2: { open: 8, close: 17 },
-    3: { open: 8, close: 17 },
-    4: { open: 8, close: 17 },
-    5: { open: 8, close: 17 },
-    6: { open: 8, close: 16 }   // Субота
-  };
-
-  function updateWorkingStatus() {
-    if (!statusDot || !statusText || !statusDetail) return;
-
-    const now = new Date();
-    const day = now.getDay();
-    const hours = now.getHours() + now.getMinutes() / 60;
-    const todaySchedule = workingHours[day];
-
-    const isOpen = hours >= todaySchedule.open && hours < todaySchedule.close;
-
-    if (isOpen) {
-      statusDot.classList.remove("closed");
-      statusText.textContent = "Зараз відкрито";
-
-      const closeIn = todaySchedule.close - hours;
-      const closeHours = Math.floor(closeIn);
-      const closeMinutes = Math.round((closeIn - closeHours) * 60);
-
-      statusDetail.textContent = `До закриття: ${closeHours} год ${closeMinutes} хв — встигаєте на сеанс!`;
-    } else {
-      statusDot.classList.add("closed");
-      statusText.textContent = "Зараз закрито";
-
-      let nextOpenText = "";
-      if (hours < todaySchedule.open) {
-        const untilOpen = todaySchedule.open - hours;
-        const untilHours = Math.floor(untilOpen);
-        const untilMinutes = Math.round((untilOpen - untilHours) * 60);
-        nextOpenText = `Відкриємось через ${untilHours} год ${untilMinutes} хв`;
-      } else {
-        const nextDay = (day + 1) % 7;
-        const nextSchedule = workingHours[nextDay];
-        nextOpenText = `Відкриємось завтра о ${nextSchedule.open}:00`;
-      }
-
-      statusDetail.textContent = nextOpenText;
-    }
-
-    if (scheduleList) {
-      const items = scheduleList.querySelectorAll("li");
-      items.forEach((li) => {
-        const liDay = parseInt(li.getAttribute("data-day"), 10);
-        li.classList.toggle("today", liDay === day);
-      });
-    }
-  }
-
-  updateWorkingStatus();
-  setInterval(updateWorkingStatus, 60000);
-
-
-
-
-
-
-
 
 
 
@@ -664,3 +569,16 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }); 
+
+
+
+
+
+// Колбек для Google Translate API — має бути глобальною функцією
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: "uk",
+    includedLanguages: "uk,en,pl,ru",
+    autoDisplay: false
+  }, "google_translate_element");
+}
