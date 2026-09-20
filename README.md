@@ -1,10 +1,50 @@
-# TM_MASSAGE
+# TM_MASSAGE 🌿
 
-Professional commercial website for TM_MASSAGE massage studio.
+Преміальний комерційний веб-сайт для професійної масажної студії. Проєкт створений з акцентом на елегантний дизайн (темна тема із золотими акцентами), зручний інтерфейс та ідеальну адаптивність на всіх типах пристроїв — від мобільних телефонів до надвеликих 4K-моніторів.
 
-## Technology
+## 🌟 Особливості (Features)
+- **Преміальний UI/UX дизайн:** Використання вишуканої типографіки (Cormorant Garamond) та плавних CSS-анімацій.
+- **Повна адаптивність (Responsive Web Design):** Гумова верстка з використанням функцій `clamp()`, `minmax()` та комплексних медіазапитів.
+- **Сучасні сітки:** Динамічне компонування карток послуг та переваг за допомогою CSS Grid та Flexbox.
+- **Інтерактивні компоненти:** Слайдери відгуків, модальні вікна для запису на сеанс, адаптивне навігаційне меню.
+- **Продуктивність:** Чистий ванільний код без важких фреймворків.
 
-- HTML5
-- CSS3
-- JavaScript ES6+
-- GitHub Pages
+## 🛠 Технології (Tech Stack)
+- **HTML5** (Семантична розмітка)
+- **CSS3** (Медіазапити, CSS Grid, Flexbox, кастомні змінні)
+- **JavaScript (ES6+)** (Взаємодія з DOM, логіка модальних вікон)
+- **Swiper.js** (Сенсорні слайдери/каруселі)
+- **Google Fonts** (Типографіка)
+- **GitHub Pages** (Хостинг та CI/CD розгортання)
+
+## 📂 Структура проєкту (Project Structure)
+```text
+TM_MASSAGE/
+│
+├── css/
+│   ├── posluga.css
+│   └── style.css
+│
+├── docs/
+│   └── PROJECT_CONTEXT.md
+│
+├── html/
+│   ├── MASSAGE_VUDU/
+│   ├── OSNOVNI_STORINKU/
+│   ├── footer.html
+│   └── top-bar.html
+│
+├── js/
+│   └── script.js
+│
+├── screenshots/
+│   ├── apparaty/
+│   ├── cabinet/
+│   ├── chayi/
+│   ├── DIPLOM/
+│   ├── GOLOVNA/
+│   ├── icons/
+│   └── MASSAGE/
+│
+├── .gitattributes
+└── index.html
